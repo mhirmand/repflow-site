@@ -291,7 +291,19 @@ function tickDemo() {
 tickDemo();
 setInterval(tickDemo, 1000);
 
-// ---- Speech (production upgrade path: swap for pre-rendered clips) ----
+// ---- Real coach audio (pre-rendered studio voices), Web Speech fallback ----
+var currentAudio = null;
+function stopAllVoices() {
+  if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; currentAudio = null; }
+  if (window.speechSynthesis) speechSynthesis.cancel();
+}
+function playClip(src, fallback) {
+  stopAllVoices();
+  var a = new Audio(src);
+  currentAudio = a;
+  a.play().catch(function () { if (fallback) fallback(); });
+  return a;
+}
 function speak(line, hyped, female) {
   if (!window.speechSynthesis) return;
   speechSynthesis.cancel();
@@ -304,10 +316,22 @@ function speak(line, hyped, female) {
   if (v) u.voice = v;
   speechSynthesis.speak(u);
 }
+// Hero demo: the three lines mirror the on-card session loop, chained.
+var heroClips = ['audio/hero-1.mp3', 'audio/hero-2.mp3', 'audio/hero-3.mp3'];
 document.getElementById('hearBtn').addEventListener('click', function () {
-  speak('Set 3 done. Rest — ninety seconds.', false, true);
-  setTimeout(function(){ speak('Thirty seconds. Next: incline press, set two of three.', false, true); }, 4200);
-  setTimeout(function(){ speak('Get ready. Go.', false, true); }, 8600);
+  var i = 0;
+  function next() {
+    if (i >= heroClips.length) return;
+    var a = playClip(heroClips[i++]);
+    a.addEventListener('ended', function () { setTimeout(next, 500); });
+    a.addEventListener('error', function () {
+      // Fallback: reference Web Speech sequence.
+      speak('Set 3 done. Rest — ninety seconds.', false, true);
+      setTimeout(function(){ speak('Thirty seconds. Next: incline press, set two of three.', false, true); }, 4200);
+      setTimeout(function(){ speak('Get ready. Go.', false, true); }, 8600);
+    });
+  }
+  next();
 });
 
 // ---- Voice-line ticker (duplicated for the −50% loop) ----
@@ -337,7 +361,9 @@ coaches.forEach(function (c) {
   card.className = 'coach';
   card.innerHTML = '<span class="tag' + (c[2] ? ' hyped' : '') + '">' + c[1] + '</span>' +
     '<h3>' + c[0] + '</h3><p>' + c[4] + '</p><div class="hear">▶ Hear ' + c[0] + '</div>';
-  card.addEventListener('click', function () { speak(c[5], c[2], c[3]); });
+  card.addEventListener('click', function () {
+    playClip('audio/' + c[0].toLowerCase() + '.mp3', function () { speak(c[5], c[2], c[3]); });
+  });
   grid.appendChild(card);
 });
 </script>
