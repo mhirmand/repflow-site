@@ -165,7 +165,7 @@ footer{display:flex;align-items:center;justify-content:center;gap:10px;margin-to
     <h1>Your workout<br>has <span class="gps">GPS</span> now.</h1>
     <p>Music plays. A coach's voice cuts through to call every set and rest. You never touch a timer — the session drives itself.</p>
     <div class="hero-ctas">
-      <button class="pill hero-cta" id="hearBtn">▶ Hear it work</button>
+      <a class="pill hero-cta" id="heroCta" href="#get">Get the app</a>
       <div class="hero-note">Free 14-day trial · iPhone</div>
     </div>
   </div>
@@ -259,6 +259,7 @@ footer{display:flex;align-items:center;justify-content:center;gap:10px;margin-to
 var APP_URL = "mailto:support@repbeat.app?subject=Repbeat%20waitlist&body=Tell%20me%20when%20Repbeat%20launches.";
 document.getElementById('navCta').href = APP_URL;
 document.getElementById('ctaBtn').href = APP_URL;
+document.getElementById('heroCta').href = APP_URL;
 
 // ---- Live session demo: 20 s loop (0–7 work, 8–9 speak, 10–17 rest, 18–19 speak) ----
 var t = 0;
@@ -316,23 +317,6 @@ function speak(line, hyped, female) {
   if (v) u.voice = v;
   speechSynthesis.speak(u);
 }
-// Hero demo: the three lines mirror the on-card session loop, chained.
-var heroClips = ['audio/hero-1.mp3', 'audio/hero-2.mp3', 'audio/hero-3.mp3'];
-document.getElementById('hearBtn').addEventListener('click', function () {
-  var i = 0;
-  function next() {
-    if (i >= heroClips.length) return;
-    var a = playClip(heroClips[i++]);
-    a.addEventListener('ended', function () { setTimeout(next, 500); });
-    a.addEventListener('error', function () {
-      // Fallback: reference Web Speech sequence.
-      speak('Set 3 done. Rest — ninety seconds.', false, true);
-      setTimeout(function(){ speak('Thirty seconds. Next: incline press, set two of three.', false, true); }, 4200);
-      setTimeout(function(){ speak('Get ready. Go.', false, true); }, 8600);
-    });
-  }
-  next();
-});
 
 // ---- Voice-line ticker (duplicated for the −50% loop) ----
 var lines = ['Set 3 done. Rest — ninety seconds.', "Thirty seconds. Next: incline press.", 'Get ready.', 'Go.',
